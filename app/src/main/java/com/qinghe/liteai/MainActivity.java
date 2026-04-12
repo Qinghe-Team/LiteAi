@@ -38,9 +38,8 @@ import com.qinghe.liteai.model.FeatureOption;
 import com.qinghe.liteai.model.Message;
 import com.qinghe.liteai.service.AiResponseCallback;
 import com.qinghe.liteai.service.AiService;
-import com.qinghe.liteai.service.DemoAiService;
+import com.qinghe.liteai.service.HttpAiService;
 import com.qinghe.liteai.ui.adapter.FeatureAdapter;
-import com.qinghe.liteai.ui.widget.MarkdownWebView;
 import com.qinghe.liteai.util.DateTimeUtils;
 
 import java.util.ArrayList;
@@ -72,9 +71,11 @@ public class MainActivity extends AppCompatActivity {
         conversationRepository = new ConversationRepository(this);
         modelRepository = new ModelRepository(this);
         settingsRepository = new SettingsRepository(this);
-        aiService = new DemoAiService();
+        aiService = new HttpAiService();
 
         toolbar = findViewById(R.id.toolbar);
+        toolbar.setNavigationIcon(R.drawable.ic_add);
+        toolbar.setNavigationContentDescription(R.string.action_new_conversation);
         messageScroll = findViewById(R.id.message_scroll);
         messageContainer = findViewById(R.id.message_container);
         inputMessage = findViewById(R.id.input_message);
@@ -149,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
         View view = LayoutInflater.from(this).inflate(R.layout.view_message, messageContainer, false);
         FrameLayout row = view.findViewById(R.id.message_row);
         MaterialCardView cardView = view.findViewById(R.id.message_card);
-        MarkdownWebView webView = view.findViewById(R.id.message_webview);
+        TextView messageContent = view.findViewById(R.id.message_content);
         TextView messageTime = view.findViewById(R.id.message_time);
 
         boolean isUser = Message.ROLE_USER.equals(message.getRole());
@@ -157,9 +158,10 @@ public class MainActivity extends AppCompatActivity {
         params.gravity = isUser ? Gravity.END : Gravity.START;
         cardView.setLayoutParams(params);
         cardView.setCardBackgroundColor(ContextCompat.getColor(this, resolveBubbleColor(isUser)));
+        messageContent.setTextColor(ContextCompat.getColor(this, resolveTextColor(isUser)));
+        messageContent.setText(message.getContent());
         messageTime.setTextColor(ContextCompat.getColor(this, resolveTextColor(isUser)));
         messageTime.setText(getString(R.string.label_message_time, DateTimeUtils.formatDisplayTime(message.getCreatedAt())));
-        webView.render(message.getContent(), isDarkMode());
         cardView.setOnLongClickListener(v -> {
             ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
             if (clipboardManager != null) {
@@ -207,11 +209,12 @@ public class MainActivity extends AppCompatActivity {
         long conversationId = currentConversationId;
         AiModelConfig activeModel = modelRepository.getActiveModel();
         boolean streamEnabled = settingsRepository.isStreamOutputEnabled();
+        List<Message> requestMessages = new ArrayList<>(currentMessages);
         Message pendingAssistant = new Message(-1L, conversationId, Message.ROLE_ASSISTANT, "", System.currentTimeMillis());
         currentMessages.add(pendingAssistant);
         renderMessages();
 
-        aiService.requestReply(activeModel, new ArrayList<>(currentMessages), streamEnabled, new AiResponseCallback() {
+        aiService.requestReply(activeModel, requestMessages, streamEnabled, new AiResponseCallback() {
             @Override
             public void onPartial(String partialContent) {
                 if (conversationId == currentConversationId) {
@@ -223,6 +226,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onComplete(String fullContent) {
                 conversationRepository.addMessage(conversationId, Message.ROLE_ASSISTANT, fullContent);
+                if (conversationId == currentConversationId) {
+                    loadConversation(conversationId);
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                conversationRepository.addMessage(conversationId, Message.ROLE_ASSISTANT, errorMessage);
                 if (conversationId == currentConversationId) {
                     loadConversation(conversationId);
                 }

@@ -2,11 +2,11 @@ package com.qinghe.liteai;
 
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.MotionEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.qinghe.liteai.data.ModelRepository;
 import com.qinghe.liteai.model.AiModelConfig;
@@ -93,13 +94,26 @@ public class ModelManagementActivity extends AppCompatActivity {
     private void showModelEditor(AiModelConfig existing) {
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_model_edit, null, false);
         TextInputEditText nameInput = view.findViewById(R.id.input_model_name);
-        AutoCompleteTextView modeInput = view.findViewById(R.id.input_model_mode);
+        MaterialAutoCompleteTextView modeInput = view.findViewById(R.id.input_model_mode);
         TextInputEditText urlInput = view.findViewById(R.id.input_model_url);
         TextInputEditText keyInput = view.findViewById(R.id.input_model_key);
         TextInputEditText codeInput = view.findViewById(R.id.input_model_code);
 
         String[] modes = getResources().getStringArray(R.array.api_modes);
         modeInput.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, modes));
+        modeInput.setSimpleItems(modes);
+        modeInput.setOnClickListener(v -> modeInput.showDropDown());
+        modeInput.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                modeInput.showDropDown();
+            }
+        });
+        modeInput.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                modeInput.showDropDown();
+            }
+            return false;
+        });
 
         if (existing != null) {
             nameInput.setText(existing.getName());
@@ -111,10 +125,13 @@ public class ModelManagementActivity extends AppCompatActivity {
             modeInput.setText(modes[0], false);
         }
 
-        new MaterialAlertDialogBuilder(this)
+        androidx.appcompat.app.AlertDialog dialog = new MaterialAlertDialogBuilder(this)
                 .setTitle(existing == null ? R.string.dialog_add_model_title : R.string.dialog_edit_model_title)
                 .setView(view)
-                .setPositiveButton(R.string.dialog_save, (dialog, which) -> {
+                .setPositiveButton(R.string.dialog_save, null)
+                .setNegativeButton(R.string.dialog_cancel, null)
+                .create();
+        dialog.setOnShowListener(dialogInterface -> dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
                     String name = textOf(nameInput);
                     String mode = textOf(modeInput);
                     String url = textOf(urlInput);
@@ -129,9 +146,9 @@ public class ModelManagementActivity extends AppCompatActivity {
                     modelRepository.saveModel(new AiModelConfig(id, name, mode, url, key, code, active));
                     Toast.makeText(this, R.string.toast_model_saved, Toast.LENGTH_SHORT).show();
                     reload();
-                })
-                .setNegativeButton(R.string.dialog_cancel, null)
-                .show();
+                    dialog.dismiss();
+                }));
+        dialog.show();
     }
 
     private String textOf(TextView textView) {

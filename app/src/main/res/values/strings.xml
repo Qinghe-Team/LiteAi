@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">LiteAi</string>
     <string name="action_more">更多</string>
+    <string name="action_new_conversation">新建对话</string>
     <string name="action_add_model">添加模型</string>
     <string name="conversation_default_prefix">新对话</string>
     <string name="hint_message_input">输入消息…</string>
