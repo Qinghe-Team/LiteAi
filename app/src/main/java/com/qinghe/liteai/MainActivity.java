@@ -40,6 +40,7 @@ import com.qinghe.liteai.service.AiResponseCallback;
 import com.qinghe.liteai.service.AiService;
 import com.qinghe.liteai.service.HttpAiService;
 import com.qinghe.liteai.ui.adapter.FeatureAdapter;
+import com.qinghe.liteai.ui.widget.MarkdownWebView;
 import com.qinghe.liteai.util.DateTimeUtils;
 
 import java.util.ArrayList;
@@ -150,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
         View view = LayoutInflater.from(this).inflate(R.layout.view_message, messageContainer, false);
         FrameLayout row = view.findViewById(R.id.message_row);
         MaterialCardView cardView = view.findViewById(R.id.message_card);
-        TextView messageContent = view.findViewById(R.id.message_content);
+        MarkdownWebView messageContent = view.findViewById(R.id.message_webview);
         TextView messageTime = view.findViewById(R.id.message_time);
 
         boolean isUser = Message.ROLE_USER.equals(message.getRole());
@@ -158,8 +159,7 @@ public class MainActivity extends AppCompatActivity {
         params.gravity = isUser ? Gravity.END : Gravity.START;
         cardView.setLayoutParams(params);
         cardView.setCardBackgroundColor(ContextCompat.getColor(this, resolveBubbleColor(isUser)));
-        messageContent.setTextColor(ContextCompat.getColor(this, resolveTextColor(isUser)));
-        messageContent.setText(message.getContent());
+        messageContent.render(message.getContent(), isDarkMode());
         messageTime.setTextColor(ContextCompat.getColor(this, resolveTextColor(isUser)));
         messageTime.setText(getString(R.string.label_message_time, DateTimeUtils.formatDisplayTime(message.getCreatedAt())));
         cardView.setOnLongClickListener(v -> {
