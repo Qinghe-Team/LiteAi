@@ -13,7 +13,14 @@ public class DemoAiService implements AiService {
 
     @Override
     public void requestReply(AiModelConfig model, List<Message> messages, boolean streamOutput, AiResponseCallback callback) {
-        String latestMessage = messages.isEmpty() ? "" : messages.get(messages.size() - 1).getContent();
+        String latestMessage = "";
+        for (int index = messages.size() - 1; index >= 0; index--) {
+            Message message = messages.get(index);
+            if (Message.ROLE_USER.equals(message.getRole())) {
+                latestMessage = message.getContent();
+                break;
+            }
+        }
         String reply = buildReply(model, latestMessage);
         if (!streamOutput) {
             handler.post(() -> callback.onComplete(reply));
