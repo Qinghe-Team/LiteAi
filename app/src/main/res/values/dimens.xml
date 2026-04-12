@@ -1,0 +1,8 @@
+<resources>
+    <dimen name="screen_padding">8dp</dimen>
+    <dimen name="toolbar_height">48dp</dimen>
+    <dimen name="message_corner">16dp</dimen>
+    <dimen name="message_spacing">8dp</dimen>
+    <dimen name="composer_corner">20dp</dimen>
+    <dimen name="composer_height">44dp</dimen>
+</resources>

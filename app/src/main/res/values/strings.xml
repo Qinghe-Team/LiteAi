@@ -1,0 +1,61 @@
+<resources>
+    <string name="app_name">LiteAi</string>
+    <string name="action_more">更多</string>
+    <string name="action_add_model">添加模型</string>
+    <string name="conversation_default_prefix">新对话</string>
+    <string name="hint_message_input">输入消息…</string>
+    <string name="action_send">发送</string>
+    <string name="feature_history">对话历史</string>
+    <string name="feature_models">模型管理</string>
+    <string name="feature_settings">设置</string>
+    <string name="feature_about">关于</string>
+    <string name="history_title">对话历史</string>
+    <string name="models_title">模型管理</string>
+    <string name="settings_title">设置</string>
+    <string name="about_title">关于 LiteAi</string>
+    <string name="settings_stream">使用流式输出</string>
+    <string name="settings_stream_summary">模拟 AI 响应时按段输出消息</string>
+    <string name="settings_dark">深色模式</string>
+    <string name="settings_dark_summary">关闭后使用浅色模式</string>
+    <string name="about_author">作者：Qinghe</string>
+    <string name="about_repo">仓库：https://github.com/Qinghe-Team/LiteAi</string>
+    <string name="about_changelog_title">更新日志</string>
+    <string name="about_changelog_body">20260412：初始化 LiteAi 手表版基础工程，提供聊天、历史、模型管理、设置与关于页面。</string>
+    <string name="about_version">版本：%1$s</string>
+    <string name="empty_history">还没有对话历史</string>
+    <string name="empty_models">还没有模型，先添加一个吧</string>
+    <string name="dialog_more_title">更多功能</string>
+    <string name="dialog_edit">重命名</string>
+    <string name="dialog_delete">删除</string>
+    <string name="dialog_cancel">取消</string>
+    <string name="dialog_save">保存</string>
+    <string name="dialog_add_model_title">新增模型</string>
+    <string name="dialog_edit_model_title">编辑模型</string>
+    <string name="model_name">名称</string>
+    <string name="model_mode">API 模式</string>
+    <string name="model_url">API 地址</string>
+    <string name="model_key">API_KEY</string>
+    <string name="model_code">模型代号</string>
+    <string name="model_active">当前使用</string>
+    <string name="model_inactive">点击启用</string>
+    <string name="toast_copied">已复制消息</string>
+    <string name="toast_conversation_deleted">对话已删除</string>
+    <string name="toast_model_deleted">模型已删除</string>
+    <string name="toast_model_saved">模型已保存</string>
+    <string name="toast_model_activated">已切换当前模型</string>
+    <string name="toast_settings_saved">设置已保存</string>
+    <string name="toast_input_required">请输入消息内容</string>
+    <string name="toast_model_fields_required">请完整填写模型信息</string>
+    <string name="toast_title_required">标题不能为空</string>
+    <string name="toast_repo_unavailable">未找到可打开仓库的应用</string>
+    <string name="label_last_message_time">最近对话：%1$s</string>
+    <string name="label_message_time">%1$s</string>
+    <string name="label_api_mode">API 模式：%1$s</string>
+    <string name="label_api_url">API：%1$s</string>
+    <string name="label_model_code">模型代号：%1$s</string>
+    <string-array name="api_modes">
+        <item>OpenAI API 兼容</item>
+        <item>Claude API 兼容</item>
+        <item>Gemini API 兼容</item>
+    </string-array>
+</resources>
