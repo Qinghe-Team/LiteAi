@@ -34,18 +34,38 @@ jobs:
       - name: Make Gradle wrapper executable
         run: chmod +x ./gradlew
 
+      - name: Validate signing secrets
+        run: |
+          missing=0
+          for name in \
+            ANDROID_SIGNING_KEYSTORE_BASE64 \
+            ANDROID_SIGNING_STORE_PASSWORD \
+            ANDROID_SIGNING_KEY_ALIAS \
+            ANDROID_SIGNING_KEY_PASSWORD
+          do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name is required to build signed release artifacts."
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            exit 1
+          fi
+
       - name: Prepare signing keystore
-        if: ${{ env.ANDROID_SIGNING_KEYSTORE_BASE64 != '' && env.ANDROID_SIGNING_STORE_PASSWORD != '' && env.ANDROID_SIGNING_KEY_ALIAS != '' && env.ANDROID_SIGNING_KEY_PASSWORD != '' }}
         run: |
           KEYSTORE_PATH="$RUNNER_TEMP/liteai-signing.jks"
           printf '%s' "$ANDROID_SIGNING_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_PATH"
           echo "ANDROID_SIGNING_STORE_FILE=$KEYSTORE_PATH" >> "$GITHUB_ENV"
 
-      - name: Build debug APK and run unit tests
-        run: ./gradlew assembleDebug testDebugUnitTest
+      - name: Build signed release packages and run unit tests
+        run: ./gradlew testDebugUnitTest assembleRelease bundleRelease
 
-      - name: Upload debug APK
+      - name: Upload signed release artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: liteai-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          name: liteai-signed-release
+          if-no-files-found: error
+          path: |
+            app/build/outputs/apk/release/*.apk
+            app/build/outputs/bundle/release/*.aab

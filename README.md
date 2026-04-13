@@ -12,8 +12,15 @@ LiteAi 是一款面向小天才手表（320×360 屏幕）的 AI 对话应用基
 
 ## 构建
 ```bash
-./gradlew assembleDebug
+./gradlew assembleRelease
 ```
+
+CI 的 `build` / `release` 工作流都会要求提供以下 GitHub Secrets 后再生成签名版 release APK / AAB：
+
+- `ANDROID_SIGNING_KEYSTORE_BASE64`
+- `ANDROID_SIGNING_STORE_PASSWORD`
+- `ANDROID_SIGNING_KEY_ALIAS`
+- `ANDROID_SIGNING_KEY_PASSWORD`
 
 ## 版本
 - versionName: `20260412`
