@@ -1,11 +1,6 @@
 package com.qinghe.liteai.util;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 public final class MarkdownMessageFormatter {
-    private static final Pattern INLINE_PAREN_LATEX = Pattern.compile("\\\\\\((.+?)\\\\\\)");
-
     private MarkdownMessageFormatter() {
     }
 
@@ -61,13 +56,30 @@ public final class MarkdownMessageFormatter {
     }
 
     private static String normalizeInlineParenMath(String line) {
-        Matcher matcher = INLINE_PAREN_LATEX.matcher(line);
-        StringBuffer buffer = new StringBuffer();
-        while (matcher.find()) {
-            matcher.appendReplacement(buffer, Matcher.quoteReplacement("$$" + matcher.group(1) + "$$"));
+        StringBuilder builder = new StringBuilder(line.length() + 8);
+        boolean inCodeSpan = false;
+
+        for (int index = 0; index < line.length(); index++) {
+            char current = line.charAt(index);
+            if (current == '`') {
+                inCodeSpan = !inCodeSpan;
+                builder.append(current);
+                continue;
+            }
+            if (!inCodeSpan && current == '\\' && index + 1 < line.length() && line.charAt(index + 1) == '(') {
+                int closing = findClosingParenLatex(line, index + 2);
+                if (closing > index + 2) {
+                    String expression = line.substring(index + 2, closing);
+                    if (containsVisibleText(expression)) {
+                        builder.append("$$").append(expression).append("$$");
+                        index = closing + 1;
+                        continue;
+                    }
+                }
+            }
+            builder.append(current);
         }
-        matcher.appendTail(buffer);
-        return buffer.toString();
+        return builder.toString();
     }
 
     private static String normalizeSingleDollarInlineMath(String line) {
@@ -95,6 +107,21 @@ public final class MarkdownMessageFormatter {
             builder.append(current);
         }
         return builder.toString();
+    }
+
+    private static int findClosingParenLatex(String line, int start) {
+        boolean inCodeSpan = false;
+        for (int index = start; index < line.length() - 1; index++) {
+            char current = line.charAt(index);
+            if (current == '`') {
+                inCodeSpan = !inCodeSpan;
+                continue;
+            }
+            if (!inCodeSpan && current == '\\' && line.charAt(index + 1) == ')') {
+                return index;
+            }
+        }
+        return -1;
     }
 
     private static int findClosingSingleDollar(String line, int start) {
