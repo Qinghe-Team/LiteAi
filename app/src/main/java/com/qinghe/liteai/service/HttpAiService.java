@@ -26,6 +26,7 @@ import com.openai.models.chat.completions.ChatCompletionCreateParams;
 import com.qinghe.liteai.model.AiModelConfig;
 import com.qinghe.liteai.model.Message;
 import com.qinghe.liteai.util.AiApiUrlNormalizer;
+import com.qinghe.liteai.util.ConversationPromptInjector;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +50,7 @@ public class HttpAiService implements AiService {
                 return;
             }
 
-            List<Message> requestMessages = sanitizeMessages(messages);
+            List<Message> requestMessages = ConversationPromptInjector.injectFirstUserPrompt(sanitizeMessages(messages));
             if (requestMessages.isEmpty()) {
                 postError(callback, "没有可发送的对话内容。");
                 return;

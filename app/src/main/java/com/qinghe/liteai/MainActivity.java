@@ -1,8 +1,5 @@
 package com.qinghe.liteai;
 
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -160,17 +157,10 @@ public class MainActivity extends AppCompatActivity {
         cardView.setLayoutParams(params);
         cardView.setCardBackgroundColor(ContextCompat.getColor(this, resolveBubbleColor(isUser)));
         messageContent.setTextColor(ContextCompat.getColor(this, resolveTextColor(isUser)));
+        messageContent.setTextIsSelectable(true);
         MarkdownRenderer.render(messageContent, message.getContent());
         messageTime.setTextColor(ContextCompat.getColor(this, resolveTextColor(isUser)));
         messageTime.setText(getString(R.string.label_message_time, DateTimeUtils.formatDisplayTime(message.getCreatedAt())));
-        cardView.setOnLongClickListener(v -> {
-            ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-            if (clipboardManager != null) {
-                clipboardManager.setPrimaryClip(ClipData.newPlainText("message", message.getContent()));
-                Toast.makeText(this, R.string.toast_copied, Toast.LENGTH_SHORT).show();
-            }
-            return true;
-        });
         return row;
     }
 
