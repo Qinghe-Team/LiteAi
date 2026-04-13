@@ -22,6 +22,8 @@ public class SettingsActivity extends AppCompatActivity {
 
         MaterialSwitch streamSwitch = findViewById(R.id.switch_stream);
         MaterialSwitch darkSwitch = findViewById(R.id.switch_dark);
+        findViewById(R.id.row_stream).setOnClickListener(view -> streamSwitch.toggle());
+        findViewById(R.id.row_dark).setOnClickListener(view -> darkSwitch.toggle());
 
         streamSwitch.setChecked(settingsRepository.isStreamOutputEnabled());
         darkSwitch.setChecked(settingsRepository.isDarkModeEnabled());

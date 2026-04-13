@@ -42,7 +42,7 @@ public class ModelManagementActivity extends AppCompatActivity {
 
         ListView listView = findViewById(R.id.model_list);
         emptyView = findViewById(R.id.empty_view);
-        adapter = new ModelAdapter(this, new ArrayList<>());
+        adapter = new ModelAdapter(this, new ArrayList<>(), this::showModelEditor);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener((parent, view, position, id) -> {
             modelRepository.setActiveModel(id);

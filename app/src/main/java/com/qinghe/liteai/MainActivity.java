@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
         public void onReplyFinished(long conversationId) {
             runOnUiThread(() -> {
                 if (conversationId == currentConversationId) {
-                    loadConversation(conversationId);
+                    finalizePendingReply(conversationId);
                 }
             });
         }
@@ -245,7 +245,7 @@ public class MainActivity extends AppCompatActivity {
         List<Message> requestMessages = new ArrayList<>(currentMessages);
         Message pendingAssistant = new Message(-1L, conversationId, Message.ROLE_ASSISTANT, "", System.currentTimeMillis());
         currentMessages.add(pendingAssistant);
-        appendMessageView(pendingAssistant, false);
+        appendMessageView(pendingAssistant, true);
         streamingReplyManager.requestReply(conversationId, activeModel, requestMessages, streamEnabled);
     }
 
@@ -267,16 +267,42 @@ public class MainActivity extends AppCompatActivity {
         if (pendingMessage == null) {
             pendingMessage = new Message(-1L, snapshot.getConversationId(), Message.ROLE_ASSISTANT, snapshot.getContent(), snapshot.getCreatedAt());
             currentMessages.add(pendingMessage);
-            appendMessageView(pendingMessage, false);
+            appendMessageView(pendingMessage, true);
             return;
         }
         pendingMessage.setContent(snapshot.getContent());
         int lastIndex = currentMessages.size() - 1;
         if (lastIndex < 0 || lastIndex >= messageContainer.getChildCount()) {
-            appendMessageView(pendingMessage, false);
+            appendMessageView(pendingMessage, true);
             return;
         }
-        bindMessageView(messageContainer.getChildAt(lastIndex), pendingMessage, false);
+        bindMessageView(messageContainer.getChildAt(lastIndex), pendingMessage, true);
+        scrollToBottom(false);
+    }
+
+    private void finalizePendingReply(long conversationId) {
+        Message pendingMessage = findPendingAssistantMessage();
+        if (pendingMessage == null || currentMessages.isEmpty()) {
+            loadConversation(conversationId);
+            return;
+        }
+        List<Message> persistedMessages = conversationRepository.getMessages(conversationId);
+        if (persistedMessages.isEmpty()) {
+            loadConversation(conversationId);
+            return;
+        }
+        Message persistedMessage = persistedMessages.get(persistedMessages.size() - 1);
+        if (!Message.ROLE_ASSISTANT.equals(persistedMessage.getRole())) {
+            loadConversation(conversationId);
+            return;
+        }
+        currentMessages.set(currentMessages.size() - 1, persistedMessage);
+        int lastIndex = messageContainer.getChildCount() - 1;
+        if (lastIndex < 0) {
+            renderMessages();
+            return;
+        }
+        bindMessageView(messageContainer.getChildAt(lastIndex), persistedMessage, true);
         scrollToBottom(false);
     }
 
@@ -292,7 +318,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean shouldRenderMarkdown(Message message) {
-        return !isPendingAssistantMessage(message);
+        return true;
     }
 
     private boolean isPendingAssistantMessage(Message message) {
