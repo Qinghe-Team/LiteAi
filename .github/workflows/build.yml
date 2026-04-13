@@ -12,6 +12,11 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      ANDROID_SIGNING_KEYSTORE_BASE64: ${{ secrets.ANDROID_SIGNING_KEYSTORE_BASE64 }}
+      ANDROID_SIGNING_STORE_PASSWORD: ${{ secrets.ANDROID_SIGNING_STORE_PASSWORD }}
+      ANDROID_SIGNING_KEY_ALIAS: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}
+      ANDROID_SIGNING_KEY_PASSWORD: ${{ secrets.ANDROID_SIGNING_KEY_PASSWORD }}
 
     steps:
       - name: Checkout
@@ -28,6 +33,13 @@ jobs:
 
       - name: Make Gradle wrapper executable
         run: chmod +x ./gradlew
+
+      - name: Prepare signing keystore
+        if: ${{ env.ANDROID_SIGNING_KEYSTORE_BASE64 != '' && env.ANDROID_SIGNING_STORE_PASSWORD != '' && env.ANDROID_SIGNING_KEY_ALIAS != '' && env.ANDROID_SIGNING_KEY_PASSWORD != '' }}
+        run: |
+          KEYSTORE_PATH="$RUNNER_TEMP/liteai-signing.jks"
+          printf '%s' "$ANDROID_SIGNING_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_PATH"
+          echo "ANDROID_SIGNING_STORE_FILE=$KEYSTORE_PATH" >> "$GITHUB_ENV"
 
       - name: Build debug APK and run unit tests
         run: ./gradlew assembleDebug testDebugUnitTest

@@ -1,5 +1,19 @@
 apply plugin: 'com.android.application'
 
+def signingStoreFilePath = System.getenv('ANDROID_SIGNING_STORE_FILE')
+def signingStorePassword = System.getenv('ANDROID_SIGNING_STORE_PASSWORD')
+def signingKeyAlias = System.getenv('ANDROID_SIGNING_KEY_ALIAS')
+def signingKeyPassword = System.getenv('ANDROID_SIGNING_KEY_PASSWORD')
+def hasCiSigning = signingStoreFilePath != null
+        && !signingStoreFilePath.trim().isEmpty()
+        && signingStorePassword != null
+        && !signingStorePassword.trim().isEmpty()
+        && signingKeyAlias != null
+        && !signingKeyAlias.trim().isEmpty()
+        && signingKeyPassword != null
+        && !signingKeyPassword.trim().isEmpty()
+        && file(signingStoreFilePath).exists()
+
 android {
     namespace 'com.qinghe.liteai'
     compileSdk 35
@@ -12,22 +26,41 @@ android {
         versionName "20260412"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
+        multiDexEnabled true
+    }
+
+    signingConfigs {
+        if (hasCiSigning) {
+            ci {
+                storeFile file(signingStoreFilePath)
+                storePassword signingStorePassword
+                keyAlias signingKeyAlias
+                keyPassword signingKeyPassword
+            }
+        }
     }
 
     buildTypes {
         debug {
             versionNameSuffix "-debug"
+            if (hasCiSigning) {
+                signingConfig signingConfigs.ci
+            }
         }
         release {
             minifyEnabled false
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (hasCiSigning) {
+                signingConfig signingConfigs.ci
+            }
         }
     }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
+        coreLibraryDesugaringEnabled true
     }
 
     buildFeatures {
@@ -44,6 +77,15 @@ android {
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'com.google.android.material:material:1.12.0'
+    implementation 'com.openai:openai-java:4.31.0'
+    implementation 'com.anthropic:anthropic-java:2.24.0'
+    implementation 'com.google.genai:google-genai:1.47.0'
+    implementation 'com.google.guava:guava:33.4.0-android'
+    implementation 'io.noties.markwon:core:4.6.2'
+    implementation 'io.noties.markwon:inline-parser:4.6.2'
+    implementation 'io.noties.markwon:ext-latex:4.6.2'
+    implementation 'io.noties.markwon:ext-tables:4.6.2'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
