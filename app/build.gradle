@@ -43,9 +43,6 @@ android {
     buildTypes {
         debug {
             versionNameSuffix "-debug"
-            if (hasCiSigning) {
-                signingConfig signingConfigs.ci
-            }
         }
         release {
             minifyEnabled false
