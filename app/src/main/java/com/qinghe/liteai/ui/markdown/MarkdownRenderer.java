@@ -24,8 +24,23 @@ public final class MarkdownRenderer {
     }
 
     public static void render(TextView textView, String markdown) {
+        String normalized = MarkdownMessageFormatter.normalize(markdown);
+        Object rendered = textView.getTag();
+        if (normalized.equals(rendered)) {
+            return;
+        }
+        textView.setTag(normalized);
         Markwon markwon = getOrCreate(textView);
-        markwon.setMarkdown(textView, MarkdownMessageFormatter.normalize(markdown));
+        markwon.setMarkdown(textView, normalized);
+    }
+
+    public static void renderPlainText(TextView textView, String text) {
+        String safeText = text == null ? "" : text;
+        if (safeText.contentEquals(textView.getText())) {
+            return;
+        }
+        textView.setTag(null);
+        textView.setText(safeText);
     }
 
     private static Markwon getOrCreate(TextView textView) {

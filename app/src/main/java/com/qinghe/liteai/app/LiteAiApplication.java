@@ -7,6 +7,8 @@ import androidx.appcompat.app.AppCompatDelegate;
 import com.qinghe.liteai.data.SettingsRepository;
 
 public class LiteAiApplication extends Application {
+    private StreamingReplyManager streamingReplyManager;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -14,5 +16,10 @@ public class LiteAiApplication extends Application {
         AppCompatDelegate.setDefaultNightMode(settingsRepository.isDarkModeEnabled()
                 ? AppCompatDelegate.MODE_NIGHT_YES
                 : AppCompatDelegate.MODE_NIGHT_NO);
+        streamingReplyManager = new StreamingReplyManager(this);
+    }
+
+    public StreamingReplyManager getStreamingReplyManager() {
+        return streamingReplyManager;
     }
 }
