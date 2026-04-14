@@ -98,7 +98,15 @@ public final class StreamingMarkdownSegmenter {
         return index + 1 < value.length()
                 && value.charAt(index) == '$'
                 && value.charAt(index + 1) == '$'
-                && (index == 0 || value.charAt(index - 1) != '\\');
+                && !isEscaped(value, index);
+    }
+
+    private static boolean isEscaped(String value, int index) {
+        int backslashCount = 0;
+        for (int cursor = index - 1; cursor >= 0 && value.charAt(cursor) == '\\'; cursor--) {
+            backslashCount++;
+        }
+        return (backslashCount % 2) == 1;
     }
 
     public static final class Segment {

@@ -37,4 +37,12 @@ public class StreamingMarkdownSegmenterTest {
         assertEquals("", segment.getMarkdownPrefix());
         assertEquals("```java\nint a = 1;", segment.getPlainSuffix());
     }
+
+    @Test
+    public void segment_handlesEscapedBackslashesBeforeLatexDelimiter() {
+        StreamingMarkdownSegmenter.Segment segment = StreamingMarkdownSegmenter.segment("\\\\$$x+y$$ tail");
+
+        assertEquals("\\\\$$x+y$$", segment.getMarkdownPrefix());
+        assertEquals(" tail", segment.getPlainSuffix());
+    }
 }
