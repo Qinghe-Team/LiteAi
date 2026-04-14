@@ -200,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
         cardView.setLayoutParams(params);
         cardView.setCardBackgroundColor(ContextCompat.getColor(this, resolveBubbleColor(isUser)));
         messageContent.setTextColor(ContextCompat.getColor(this, resolveTextColor(isUser)));
-        messageContent.setTextIsSelectable(true);
+        messageContent.setTextIsSelectable(false);
         if (shouldStreamRenderMarkdown(message)) {
             MarkdownRenderer.renderStreaming(messageContent, message.getContent());
         } else if (renderMarkdown) {
@@ -208,6 +208,10 @@ public class MainActivity extends AppCompatActivity {
         } else {
             MarkdownRenderer.renderPlainText(messageContent, message.getContent());
         }
+        messageContent.setLongClickable(true);
+        messageContent.setFocusable(true);
+        messageContent.setFocusableInTouchMode(true);
+        messageContent.setTextIsSelectable(true);
         messageTime.setTextColor(ContextCompat.getColor(this, resolveTextColor(isUser)));
         messageTime.setText(getString(R.string.label_message_time, DateTimeUtils.formatDisplayTime(message.getCreatedAt())));
     }
