@@ -280,7 +280,7 @@ public class MainActivity extends AppCompatActivity {
             appendMessageView(pendingMessage, true);
             return;
         }
-        boolean followBottom = isNearBottom();
+        boolean shouldScroll = isNearBottom();
         pendingMessage.setContent(snapshot.getContent());
         int lastIndex = currentMessages.size() - 1;
         if (lastIndex < 0 || lastIndex >= messageContainer.getChildCount()) {
@@ -288,7 +288,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         bindMessageView(messageContainer.getChildAt(lastIndex), pendingMessage, true);
-        scrollToBottom(followBottom);
+        scrollToBottom(shouldScroll);
     }
 
     private void finalizePendingReply(long conversationId) {
@@ -307,7 +307,7 @@ public class MainActivity extends AppCompatActivity {
             loadConversation(conversationId);
             return;
         }
-        boolean followBottom = isNearBottom();
+        boolean shouldScroll = isNearBottom();
         currentMessages.set(currentMessages.size() - 1, persistedMessage);
         int lastIndex = messageContainer.getChildCount() - 1;
         if (lastIndex < 0) {
@@ -315,7 +315,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         bindMessageView(messageContainer.getChildAt(lastIndex), persistedMessage, true);
-        scrollToBottom(followBottom);
+        scrollToBottom(shouldScroll);
     }
 
     private Message findPendingAssistantMessage() {

@@ -5,7 +5,7 @@ public final class StreamingMarkdownSegmenter {
     }
 
     public static Segment segment(String markdown) {
-        String normalized = MarkdownMessageFormatter.normalize(markdown);
+        String normalized = MarkdownMessageFormatter.normalize(markdown == null ? "" : markdown);
         int stableEnd = findStableMarkdownEnd(normalized);
         if (stableEnd <= 0) {
             return new Segment(normalized, "", normalized);
