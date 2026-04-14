@@ -1,0 +1,24 @@
+<resources>
+    <color name="md_theme_light_primary">#2A5CAA</color>
+    <color name="md_theme_light_onPrimary">#FFFFFF</color>
+    <color name="md_theme_light_background">#F5F7FB</color>
+    <color name="md_theme_light_surface">#FFFFFF</color>
+    <color name="md_theme_light_onSurface">#1A1C1E</color>
+    <color name="md_theme_light_secondaryContainer">#D9E2FF</color>
+    <color name="md_theme_light_onSecondaryContainer">#13264C</color>
+    <color name="md_theme_light_outline">#70757F</color>
+    <color name="md_theme_dark_primary">#B4C5FF</color>
+    <color name="md_theme_dark_onPrimary">#002B73</color>
+    <color name="md_theme_dark_background">#10131A</color>
+    <color name="md_theme_dark_surface">#171B23</color>
+    <color name="md_theme_dark_onSurface">#E4E7EE</color>
+    <color name="md_theme_dark_secondaryContainer">#2B3F68</color>
+    <color name="md_theme_dark_onSecondaryContainer">#D9E2FF</color>
+    <color name="md_theme_dark_outline">#8A909B</color>
+    <color name="chat_user_bubble">#2A5CAA</color>
+    <color name="chat_user_text">#FFFFFF</color>
+    <color name="chat_assistant_bubble">#E3ECFF</color>
+    <color name="chat_assistant_text">#102341</color>
+    <color name="chat_assistant_bubble_dark">#243551</color>
+    <color name="chat_assistant_text_dark">#E2E8F4</color>
+</resources>
