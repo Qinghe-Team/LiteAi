@@ -28,6 +28,7 @@
     <string name="dialog_more_title">更多功能</string>
     <string name="dialog_edit">重命名</string>
     <string name="dialog_delete">删除</string>
+    <string name="dialog_delete_model_message">确定删除模型“%1$s”吗？</string>
     <string name="dialog_cancel">取消</string>
     <string name="dialog_save">保存</string>
     <string name="dialog_add_model_title">新增模型</string>

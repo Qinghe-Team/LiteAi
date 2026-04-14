@@ -48,7 +48,7 @@ public class ModelManagementActivity extends AppCompatActivity {
         adapter = new ModelAdapter(this, new ArrayList<>(), this::activateModel, this::launchModelEditor);
         listView.setAdapter(adapter);
         listView.setOnItemLongClickListener((parent, view, position, id) -> {
-            showModelActions(adapter.getItem(position));
+            showDeleteModelDialog(adapter.getItem(position));
             return true;
         });
     }
@@ -73,19 +73,19 @@ public class ModelManagementActivity extends AppCompatActivity {
         emptyView.setVisibility(models.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
-    private void showModelActions(AiModelConfig model) {
-        String[] actions = {getString(R.string.dialog_edit), getString(R.string.dialog_delete)};
+    private void showDeleteModelDialog(AiModelConfig model) {
+        if (model == null) {
+            return;
+        }
         new MaterialAlertDialogBuilder(this)
                 .setTitle(model.getName())
-                .setItems(actions, (dialog, which) -> {
-                    if (which == 0) {
-                        launchModelEditor(model);
-                    } else {
-                        modelRepository.deleteModel(model.getId());
-                        Toast.makeText(this, R.string.toast_model_deleted, Toast.LENGTH_SHORT).show();
-                        reload();
-                    }
+                .setMessage(getString(R.string.dialog_delete_model_message, model.getName()))
+                .setPositiveButton(R.string.dialog_delete, (dialog, which) -> {
+                    modelRepository.deleteModel(model.getId());
+                    Toast.makeText(this, R.string.toast_model_deleted, Toast.LENGTH_SHORT).show();
+                    reload();
                 })
+                .setNegativeButton(R.string.dialog_cancel, null)
                 .show();
     }
 

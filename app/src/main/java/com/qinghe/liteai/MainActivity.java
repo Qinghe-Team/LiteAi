@@ -1,5 +1,7 @@
 package com.qinghe.liteai;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -212,8 +214,22 @@ public class MainActivity extends AppCompatActivity {
         messageContent.setFocusable(true);
         messageContent.setFocusableInTouchMode(true);
         messageContent.setTextIsSelectable(true);
+        cardView.setOnLongClickListener(view -> {
+            copyMessageContent(message.getContent());
+            return true;
+        });
         messageTime.setTextColor(ContextCompat.getColor(this, resolveTextColor(isUser)));
         messageTime.setText(getString(R.string.label_message_time, DateTimeUtils.formatDisplayTime(message.getCreatedAt())));
+    }
+
+    private void copyMessageContent(String content) {
+        ClipboardManager clipboardManager = getSystemService(ClipboardManager.class);
+        if (clipboardManager == null) {
+            return;
+        }
+        String safeContent = content == null ? "" : content;
+        clipboardManager.setPrimaryClip(ClipData.newPlainText(getString(R.string.app_name), safeContent));
+        Toast.makeText(this, R.string.toast_copied, Toast.LENGTH_SHORT).show();
     }
 
     private int resolveBubbleColor(boolean isUser) {
