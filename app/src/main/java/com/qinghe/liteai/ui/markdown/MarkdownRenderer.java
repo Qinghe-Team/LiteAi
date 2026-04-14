@@ -65,7 +65,7 @@ public final class MarkdownRenderer {
     public static void renderPlainText(TextView textView, String text) {
         String safeText = text == null ? "" : text;
         RenderState state = RenderState.plain(safeText);
-        if (state.equals(textView.getTag()) && safeText.contentEquals(textView.getText())) {
+        if (state.equals(textView.getTag())) {
             return;
         }
         textView.setTag(state);
