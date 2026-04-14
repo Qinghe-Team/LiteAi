@@ -16,20 +16,31 @@ import com.qinghe.liteai.model.AiModelConfig;
 import java.util.List;
 
 public class ModelAdapter extends BaseAdapter {
-    public interface Listener {
+    public interface SelectionListener {
         void onModelSelected(AiModelConfig model);
+    }
 
+    public interface EditListener {
         void onEditRequested(AiModelConfig model);
     }
 
+    public interface Listener extends SelectionListener, EditListener {
+    }
+
     private final LayoutInflater inflater;
-    private final Listener listener;
+    private final SelectionListener selectionListener;
+    private final EditListener editListener;
     private List<AiModelConfig> items;
 
-    public ModelAdapter(Context context, List<AiModelConfig> items, Listener listener) {
+    public ModelAdapter(Context context, List<AiModelConfig> items, SelectionListener selectionListener, EditListener editListener) {
         this.inflater = LayoutInflater.from(context);
         this.items = items;
-        this.listener = listener;
+        this.selectionListener = selectionListener;
+        this.editListener = editListener;
+    }
+
+    public ModelAdapter(Context context, List<AiModelConfig> items, Listener listener) {
+        this(context, items, listener, listener);
     }
 
     public void submit(List<AiModelConfig> models) {
@@ -58,8 +69,8 @@ public class ModelAdapter extends BaseAdapter {
         Context context = parent.getContext();
         AiModelConfig model = getItem(position);
         view.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onModelSelected(model);
+            if (selectionListener != null) {
+                selectionListener.onModelSelected(model);
             }
         });
         ((TextView) view.findViewById(R.id.model_name)).setText(model.getName());
@@ -67,15 +78,15 @@ public class ModelAdapter extends BaseAdapter {
         ((TextView) view.findViewById(R.id.model_url)).setText(context.getString(R.string.label_api_url, model.getApiUrl()));
         ((TextView) view.findViewById(R.id.model_code)).setText(context.getString(R.string.label_model_code, model.getModelCode()));
         view.findViewById(R.id.button_edit).setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onEditRequested(model);
+            if (editListener != null) {
+                editListener.onEditRequested(model);
             }
         });
         TextView status = view.findViewById(R.id.model_status);
         status.setText(model.isActive() ? R.string.model_active : R.string.model_inactive);
         status.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onModelSelected(model);
+            if (selectionListener != null) {
+                selectionListener.onModelSelected(model);
             }
         });
         int background = model.isActive() ? R.color.md_theme_light_secondaryContainer : R.color.md_theme_light_surface;
