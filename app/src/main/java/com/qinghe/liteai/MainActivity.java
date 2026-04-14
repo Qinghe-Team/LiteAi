@@ -201,7 +201,9 @@ public class MainActivity extends AppCompatActivity {
         cardView.setCardBackgroundColor(ContextCompat.getColor(this, resolveBubbleColor(isUser)));
         messageContent.setTextColor(ContextCompat.getColor(this, resolveTextColor(isUser)));
         messageContent.setTextIsSelectable(true);
-        if (renderMarkdown) {
+        if (shouldStreamRenderMarkdown(message)) {
+            MarkdownRenderer.renderStreaming(messageContent, message.getContent());
+        } else if (renderMarkdown) {
             MarkdownRenderer.render(messageContent, message.getContent());
         } else {
             MarkdownRenderer.renderPlainText(messageContent, message.getContent());
@@ -278,6 +280,7 @@ public class MainActivity extends AppCompatActivity {
             appendMessageView(pendingMessage, true);
             return;
         }
+        boolean followBottom = isNearBottom();
         pendingMessage.setContent(snapshot.getContent());
         int lastIndex = currentMessages.size() - 1;
         if (lastIndex < 0 || lastIndex >= messageContainer.getChildCount()) {
@@ -285,7 +288,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         bindMessageView(messageContainer.getChildAt(lastIndex), pendingMessage, true);
-        scrollToBottom(false);
+        scrollToBottom(followBottom);
     }
 
     private void finalizePendingReply(long conversationId) {
@@ -304,6 +307,7 @@ public class MainActivity extends AppCompatActivity {
             loadConversation(conversationId);
             return;
         }
+        boolean followBottom = isNearBottom();
         currentMessages.set(currentMessages.size() - 1, persistedMessage);
         int lastIndex = messageContainer.getChildCount() - 1;
         if (lastIndex < 0) {
@@ -311,7 +315,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         bindMessageView(messageContainer.getChildAt(lastIndex), persistedMessage, true);
-        scrollToBottom(false);
+        scrollToBottom(followBottom);
     }
 
     private Message findPendingAssistantMessage() {
@@ -327,6 +331,11 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean shouldRenderMarkdown(Message message) {
         return true;
+    }
+
+    private boolean shouldStreamRenderMarkdown(Message message) {
+        return isPendingAssistantMessage(message)
+                && streamingReplyManager.getPendingReply(message.getConversationId()) != null;
     }
 
     private boolean isPendingAssistantMessage(Message message) {
