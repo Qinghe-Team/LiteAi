@@ -24,23 +24,33 @@ public class ModelAdapter extends BaseAdapter {
         void onEditRequested(AiModelConfig model);
     }
 
-    public interface Listener extends SelectionListener, EditListener {
+    public interface DeleteListener {
+        void onDeleteRequested(AiModelConfig model);
+    }
+
+    public interface Listener extends SelectionListener, EditListener, DeleteListener {
     }
 
     private final LayoutInflater inflater;
     private final SelectionListener selectionListener;
     private final EditListener editListener;
+    private final DeleteListener deleteListener;
     private List<AiModelConfig> items;
 
-    public ModelAdapter(Context context, List<AiModelConfig> items, SelectionListener selectionListener, EditListener editListener) {
+    public ModelAdapter(Context context, List<AiModelConfig> items, SelectionListener selectionListener, EditListener editListener, DeleteListener deleteListener) {
         this.inflater = LayoutInflater.from(context);
         this.items = items;
         this.selectionListener = selectionListener;
         this.editListener = editListener;
+        this.deleteListener = deleteListener;
     }
 
     public ModelAdapter(Context context, List<AiModelConfig> items, Listener listener) {
-        this(context, items, listener, listener);
+        this(context, items, listener, listener, listener);
+    }
+
+    public ModelAdapter(Context context, List<AiModelConfig> items, SelectionListener selectionListener, EditListener editListener) {
+        this(context, items, selectionListener, editListener, null);
     }
 
     public void submit(List<AiModelConfig> models) {
@@ -72,6 +82,13 @@ public class ModelAdapter extends BaseAdapter {
             if (selectionListener != null) {
                 selectionListener.onModelSelected(model);
             }
+        });
+        view.setOnLongClickListener(v -> {
+            if (deleteListener != null) {
+                deleteListener.onDeleteRequested(model);
+                return true;
+            }
+            return false;
         });
         ((TextView) view.findViewById(R.id.model_name)).setText(model.getName());
         ((TextView) view.findViewById(R.id.model_mode)).setText(context.getString(R.string.label_api_mode, model.getApiMode()));

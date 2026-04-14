@@ -45,12 +45,8 @@ public class ModelManagementActivity extends AppCompatActivity {
 
         ListView listView = findViewById(R.id.model_list);
         emptyView = findViewById(R.id.empty_view);
-        adapter = new ModelAdapter(this, new ArrayList<>(), this::activateModel, this::launchModelEditor);
+        adapter = new ModelAdapter(this, new ArrayList<>(), this::activateModel, this::launchModelEditor, this::showDeleteModelDialog);
         listView.setAdapter(adapter);
-        listView.setOnItemLongClickListener((parent, view, position, id) -> {
-            showDeleteModelDialog(adapter.getItem(position));
-            return true;
-        });
     }
 
     @Override
