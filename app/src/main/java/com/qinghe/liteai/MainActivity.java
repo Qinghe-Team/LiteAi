@@ -225,6 +225,7 @@ public class MainActivity extends AppCompatActivity {
     private void copyMessageContent(String content) {
         ClipboardManager clipboardManager = getSystemService(ClipboardManager.class);
         if (clipboardManager == null) {
+            Toast.makeText(this, R.string.toast_copy_failed, Toast.LENGTH_SHORT).show();
             return;
         }
         String safeContent = content == null ? "" : content;

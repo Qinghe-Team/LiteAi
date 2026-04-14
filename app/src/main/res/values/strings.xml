@@ -41,6 +41,7 @@
     <string name="model_active">当前使用</string>
     <string name="model_inactive">点击启用</string>
     <string name="toast_copied">已复制消息</string>
+    <string name="toast_copy_failed">复制失败，请稍后重试</string>
     <string name="toast_conversation_deleted">对话已删除</string>
     <string name="toast_model_deleted">模型已删除</string>
     <string name="toast_model_saved">模型已保存</string>
