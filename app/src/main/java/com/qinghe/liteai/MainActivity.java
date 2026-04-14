@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
         inputMessage = findViewById(R.id.input_message);
         MaterialButton sendButton = findViewById(R.id.button_send);
 
-        toolbar.setNavigationOnClickListener(view -> createNewConversation());
+        toolbar.setNavigationOnClickListener(view -> requestNewConversation());
         toolbar.setOnMenuItemClickListener(this::onToolbarMenuItemSelected);
         sendButton.setOnClickListener(view -> sendMessage());
 
@@ -152,6 +152,14 @@ public class MainActivity extends AppCompatActivity {
         currentMessages = new ArrayList<>();
         toolbar.setTitle(conversation.getTitle());
         renderMessages();
+    }
+
+    private void requestNewConversation() {
+        if (currentConversationId > 0L && currentMessages.isEmpty()) {
+            Toast.makeText(this, R.string.toast_already_empty_conversation, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        createNewConversation();
     }
 
     private void loadConversation(long conversationId) {

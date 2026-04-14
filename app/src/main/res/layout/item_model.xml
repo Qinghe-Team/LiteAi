@@ -4,6 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="4dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
     app:cardCornerRadius="16dp"
     app:cardElevation="0dp">
 
@@ -34,6 +37,7 @@
                 android:layout_height="36dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/dialog_edit"
+                android:focusable="false"
                 android:padding="6dp"
                 android:src="@drawable/ic_edit"
                 android:tint="?attr/colorOnSurface" />
@@ -71,6 +75,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
+            android:clickable="true"
+            android:focusable="false"
             android:paddingHorizontal="8dp"
             android:paddingVertical="3dp"
             android:textAppearance="@style/TextAppearance.Material3.LabelMedium" />

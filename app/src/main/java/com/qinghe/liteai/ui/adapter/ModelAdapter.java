@@ -17,6 +17,8 @@ import java.util.List;
 
 public class ModelAdapter extends BaseAdapter {
     public interface Listener {
+        void onModelSelected(AiModelConfig model);
+
         void onEditRequested(AiModelConfig model);
     }
 
@@ -55,6 +57,11 @@ public class ModelAdapter extends BaseAdapter {
         View view = convertView != null ? convertView : inflater.inflate(R.layout.item_model, parent, false);
         Context context = parent.getContext();
         AiModelConfig model = getItem(position);
+        view.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onModelSelected(model);
+            }
+        });
         ((TextView) view.findViewById(R.id.model_name)).setText(model.getName());
         ((TextView) view.findViewById(R.id.model_mode)).setText(context.getString(R.string.label_api_mode, model.getApiMode()));
         ((TextView) view.findViewById(R.id.model_url)).setText(context.getString(R.string.label_api_url, model.getApiUrl()));
@@ -66,6 +73,11 @@ public class ModelAdapter extends BaseAdapter {
         });
         TextView status = view.findViewById(R.id.model_status);
         status.setText(model.isActive() ? R.string.model_active : R.string.model_inactive);
+        status.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onModelSelected(model);
+            }
+        });
         int background = model.isActive() ? R.color.md_theme_light_secondaryContainer : R.color.md_theme_light_surface;
         int text = model.isActive() ? R.color.md_theme_light_onSecondaryContainer : R.color.md_theme_light_onSurface;
         status.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(context, background)));
