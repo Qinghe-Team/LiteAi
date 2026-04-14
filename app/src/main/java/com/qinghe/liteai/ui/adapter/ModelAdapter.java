@@ -84,11 +84,6 @@ public class ModelAdapter extends BaseAdapter {
         });
         TextView status = view.findViewById(R.id.model_status);
         status.setText(model.isActive() ? R.string.model_active : R.string.model_inactive);
-        status.setOnClickListener(v -> {
-            if (selectionListener != null) {
-                selectionListener.onModelSelected(model);
-            }
-        });
         int background = model.isActive() ? R.color.md_theme_light_secondaryContainer : R.color.md_theme_light_surface;
         int text = model.isActive() ? R.color.md_theme_light_onSecondaryContainer : R.color.md_theme_light_onSurface;
         status.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(context, background)));
