@@ -1,23 +1,20 @@
 package com.qinghe.liteai;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
-import android.view.MotionEvent;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.textfield.MaterialAutoCompleteTextView;
-import com.google.android.material.textfield.TextInputEditText;
 import com.qinghe.liteai.data.ModelRepository;
 import com.qinghe.liteai.model.AiModelConfig;
 import com.qinghe.liteai.ui.adapter.ModelAdapter;
@@ -29,6 +26,7 @@ public class ModelManagementActivity extends AppCompatActivity {
     private ModelRepository modelRepository;
     private ModelAdapter adapter;
     private TextView emptyView;
+    private ActivityResultLauncher<Intent> modelEditorLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,19 +34,19 @@ public class ModelManagementActivity extends AppCompatActivity {
         setContentView(R.layout.activity_model_management);
 
         modelRepository = new ModelRepository(this);
+        modelEditorLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == RESULT_OK) {
+                reload();
+            }
+        });
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener(view -> finish());
         toolbar.setOnMenuItemClickListener(this::onMenuItemClick);
 
         ListView listView = findViewById(R.id.model_list);
         emptyView = findViewById(R.id.empty_view);
-        adapter = new ModelAdapter(this, new ArrayList<>(), this::showModelEditor);
+        adapter = new ModelAdapter(this, new ArrayList<>(), this::activateModel, this::launchModelEditor);
         listView.setAdapter(adapter);
-        listView.setOnItemClickListener((parent, view, position, id) -> {
-            modelRepository.setActiveModel(id);
-            Toast.makeText(this, R.string.toast_model_activated, Toast.LENGTH_SHORT).show();
-            reload();
-        });
         listView.setOnItemLongClickListener((parent, view, position, id) -> {
             showModelActions(adapter.getItem(position));
             return true;
@@ -63,7 +61,7 @@ public class ModelManagementActivity extends AppCompatActivity {
 
     private boolean onMenuItemClick(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.action_add_model) {
-            showModelEditor(null);
+            launchModelEditor(null);
             return true;
         }
         return false;
@@ -81,7 +79,7 @@ public class ModelManagementActivity extends AppCompatActivity {
                 .setTitle(model.getName())
                 .setItems(actions, (dialog, which) -> {
                     if (which == 0) {
-                        showModelEditor(model);
+                        launchModelEditor(model);
                     } else {
                         modelRepository.deleteModel(model.getId());
                         Toast.makeText(this, R.string.toast_model_deleted, Toast.LENGTH_SHORT).show();
@@ -91,67 +89,26 @@ public class ModelManagementActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void showModelEditor(AiModelConfig existing) {
-        View view = LayoutInflater.from(this).inflate(R.layout.dialog_model_edit, null, false);
-        TextInputEditText nameInput = view.findViewById(R.id.input_model_name);
-        MaterialAutoCompleteTextView modeInput = view.findViewById(R.id.input_model_mode);
-        TextInputEditText urlInput = view.findViewById(R.id.input_model_url);
-        TextInputEditText keyInput = view.findViewById(R.id.input_model_key);
-        TextInputEditText codeInput = view.findViewById(R.id.input_model_code);
-
-        String[] modes = getResources().getStringArray(R.array.api_modes);
-        modeInput.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, modes));
-        modeInput.setSimpleItems(modes);
-        modeInput.setOnClickListener(v -> modeInput.showDropDown());
-        modeInput.setOnFocusChangeListener((v, hasFocus) -> {
-            if (hasFocus) {
-                modeInput.showDropDown();
-            }
-        });
-        modeInput.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_UP) {
-                modeInput.showDropDown();
-            }
-            return false;
-        });
-
-        if (existing != null) {
-            nameInput.setText(existing.getName());
-            modeInput.setText(existing.getApiMode(), false);
-            urlInput.setText(existing.getApiUrl());
-            keyInput.setText(existing.getApiKey());
-            codeInput.setText(existing.getModelCode());
-        } else if (modes.length > 0) {
-            modeInput.setText(modes[0], false);
+    private void activateModel(AiModelConfig model) {
+        if (model == null || model.isActive()) {
+            return;
         }
-
-        androidx.appcompat.app.AlertDialog dialog = new MaterialAlertDialogBuilder(this)
-                .setTitle(existing == null ? R.string.dialog_add_model_title : R.string.dialog_edit_model_title)
-                .setView(view)
-                .setPositiveButton(R.string.dialog_save, null)
-                .setNegativeButton(R.string.dialog_cancel, null)
-                .create();
-        dialog.setOnShowListener(dialogInterface -> dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-                    String name = textOf(nameInput);
-                    String mode = textOf(modeInput);
-                    String url = textOf(urlInput);
-                    String key = textOf(keyInput);
-                    String code = textOf(codeInput);
-                    if (TextUtils.isEmpty(name) || TextUtils.isEmpty(mode) || TextUtils.isEmpty(url) || TextUtils.isEmpty(key) || TextUtils.isEmpty(code)) {
-                        Toast.makeText(this, R.string.toast_model_fields_required, Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    long id = existing == null ? 0L : existing.getId();
-                    boolean active = existing != null && existing.isActive();
-                    modelRepository.saveModel(new AiModelConfig(id, name, mode, url, key, code, active));
-                    Toast.makeText(this, R.string.toast_model_saved, Toast.LENGTH_SHORT).show();
-                    reload();
-                    dialog.dismiss();
-                }));
-        dialog.show();
+        modelRepository.setActiveModel(model.getId());
+        Toast.makeText(this, R.string.toast_model_activated, Toast.LENGTH_SHORT).show();
+        reload();
     }
 
-    private String textOf(TextView textView) {
-        return textView.getText() == null ? "" : textView.getText().toString().trim();
+    private void launchModelEditor(AiModelConfig model) {
+        Intent intent = new Intent(this, ModelEditorActivity.class);
+        if (model != null) {
+            intent.putExtra(ModelEditorActivity.EXTRA_MODEL_ID, model.getId());
+            intent.putExtra(ModelEditorActivity.EXTRA_MODEL_NAME, model.getName());
+            intent.putExtra(ModelEditorActivity.EXTRA_MODEL_MODE, model.getApiMode());
+            intent.putExtra(ModelEditorActivity.EXTRA_MODEL_URL, model.getApiUrl());
+            intent.putExtra(ModelEditorActivity.EXTRA_MODEL_KEY, model.getApiKey());
+            intent.putExtra(ModelEditorActivity.EXTRA_MODEL_CODE, model.getModelCode());
+            intent.putExtra(ModelEditorActivity.EXTRA_MODEL_ACTIVE, model.isActive());
+        }
+        modelEditorLauncher.launch(intent);
     }
 }

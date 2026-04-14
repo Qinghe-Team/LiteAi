@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
         inputMessage = findViewById(R.id.input_message);
         MaterialButton sendButton = findViewById(R.id.button_send);
 
-        toolbar.setNavigationOnClickListener(view -> createNewConversation());
+        toolbar.setNavigationOnClickListener(view -> requestNewConversation());
         toolbar.setOnMenuItemClickListener(this::onToolbarMenuItemSelected);
         sendButton.setOnClickListener(view -> sendMessage());
 
@@ -154,6 +154,14 @@ public class MainActivity extends AppCompatActivity {
         renderMessages();
     }
 
+    private void requestNewConversation() {
+        if (currentConversationId > 0L && currentMessages.isEmpty()) {
+            Toast.makeText(this, R.string.toast_already_empty_conversation, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        createNewConversation();
+    }
+
     private void loadConversation(long conversationId) {
         Conversation conversation = conversationRepository.getConversation(conversationId);
         if (conversation == null) {
@@ -192,12 +200,18 @@ public class MainActivity extends AppCompatActivity {
         cardView.setLayoutParams(params);
         cardView.setCardBackgroundColor(ContextCompat.getColor(this, resolveBubbleColor(isUser)));
         messageContent.setTextColor(ContextCompat.getColor(this, resolveTextColor(isUser)));
-        messageContent.setTextIsSelectable(true);
-        if (renderMarkdown) {
+        messageContent.setTextIsSelectable(false);
+        if (shouldStreamRenderMarkdown(message)) {
+            MarkdownRenderer.renderStreaming(messageContent, message.getContent());
+        } else if (renderMarkdown) {
             MarkdownRenderer.render(messageContent, message.getContent());
         } else {
             MarkdownRenderer.renderPlainText(messageContent, message.getContent());
         }
+        messageContent.setLongClickable(true);
+        messageContent.setFocusable(true);
+        messageContent.setFocusableInTouchMode(true);
+        messageContent.setTextIsSelectable(true);
         messageTime.setTextColor(ContextCompat.getColor(this, resolveTextColor(isUser)));
         messageTime.setText(getString(R.string.label_message_time, DateTimeUtils.formatDisplayTime(message.getCreatedAt())));
     }
@@ -270,6 +284,7 @@ public class MainActivity extends AppCompatActivity {
             appendMessageView(pendingMessage, true);
             return;
         }
+        boolean shouldScroll = isNearBottom();
         pendingMessage.setContent(snapshot.getContent());
         int lastIndex = currentMessages.size() - 1;
         if (lastIndex < 0 || lastIndex >= messageContainer.getChildCount()) {
@@ -277,7 +292,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         bindMessageView(messageContainer.getChildAt(lastIndex), pendingMessage, true);
-        scrollToBottom(false);
+        scrollToBottom(shouldScroll);
     }
 
     private void finalizePendingReply(long conversationId) {
@@ -296,6 +311,7 @@ public class MainActivity extends AppCompatActivity {
             loadConversation(conversationId);
             return;
         }
+        boolean shouldScroll = isNearBottom();
         currentMessages.set(currentMessages.size() - 1, persistedMessage);
         int lastIndex = messageContainer.getChildCount() - 1;
         if (lastIndex < 0) {
@@ -303,7 +319,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         bindMessageView(messageContainer.getChildAt(lastIndex), persistedMessage, true);
-        scrollToBottom(false);
+        scrollToBottom(shouldScroll);
     }
 
     private Message findPendingAssistantMessage() {
@@ -319,6 +335,11 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean shouldRenderMarkdown(Message message) {
         return true;
+    }
+
+    private boolean shouldStreamRenderMarkdown(Message message) {
+        return isPendingAssistantMessage(message)
+                && streamingReplyManager.getPendingReply(message.getConversationId()) != null;
     }
 
     private boolean isPendingAssistantMessage(Message message) {

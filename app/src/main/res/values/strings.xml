@@ -50,6 +50,7 @@
     <string name="toast_title_required">标题不能为空</string>
     <string name="toast_repo_unavailable">未找到可打开仓库的应用</string>
     <string name="toast_reply_in_progress">请等待当前回复完成</string>
+    <string name="toast_already_empty_conversation">当前已经是空白新对话</string>
     <string name="label_last_message_time">最近对话：%1$s</string>
     <string name="label_message_time">%1$s</string>
     <string name="label_api_mode">API 模式：%1$s</string>
