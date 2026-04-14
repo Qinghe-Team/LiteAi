@@ -74,9 +74,6 @@ public class ModelManagementActivity extends AppCompatActivity {
     }
 
     private void showDeleteModelDialog(AiModelConfig model) {
-        if (model == null) {
-            return;
-        }
         new MaterialAlertDialogBuilder(this)
                 .setTitle(model.getName())
                 .setMessage(getString(R.string.dialog_delete_model_message, model.getName()))
